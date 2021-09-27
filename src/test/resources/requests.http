@@ -1,0 +1,155 @@
+###
+# Registration
+POST https://server.local:8443/api/rest/users/register
+Content-Type: application/json
+
+{
+  "username": {{$uuid}},
+  "password": "top-secret"
+}
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
+
+###
+
+POST https://server.local:8443/api/rest/users/login
+Content-Type: application/json
+
+{
+  "username": "viktor",
+  "password": "priveet",
+  "isCookieEnable": true
+
+}
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
+
+###
+
+
+POST https://server.local:8443/api/rest/cards/transfer
+Authorization: 6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
+Content-Type: application/json
+
+{
+  "moneyValue": 20000,
+  "cardId": 1,
+  "companionId": 2,
+  "companionCardId": 2
+}
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 403, "Wrong Role");
+});
+%}
+###
+
+GET https://server.local:8443/api/rest/cards/1
+Authorization: 6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
+###
+
+DELETE https://server.local:8443/api/rest/cards/block/1
+Authorization: 6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
+###
+
+POST https://server.local:8443/api/rest/cards/order
+Authorization: 6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
+###
+GET https://server.local:8443/api/rest/cards/2
+Authorization: 0Y0kjj2tQTexoPYi4OdcTeVQK/94SJgl+AUuRCX4O0jGc/Nq4RoYO0xn3/fXw6Js7X2s3dqaizvi0coM9LVehg==
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
+###
+
+DELETE https://server.local:8443/api/rest/cards/block/2
+Authorization: 0Y0kjj2tQTexoPYi4OdcTeVQK/94SJgl+AUuRCX4O0jGc/Nq4RoYO0xn3/fXw6Js7X2s3dqaizvi0coM9LVehg==
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 403, "Wrong role to delete");
+});
+%}
+
+###
+
+GET https://server.local:8443/api/rest/cards/1
+Authorization: Basic dmlrdG9yOnByaXZlZXQ=
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
+###
+
+GET https://server.local:8443/api/rest/cards/1
+Cookie: JSESSIONID=6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
+###
+
+POST https://server.local:8443/api/rest/cards/transfer
+Cookie: JSESSIONID=0Y0kjj2tQTexoPYi4OdcTeVQK/94SJgl+AUuRCX4O0jGc/Nq4RoYO0xn3/fXw6Js7X2s3dqaizvi0coM9LVehg==
+Content-Type: application/json
+
+{
+  "moneyValue": 20000,
+  "cardId": 2,
+  "companionId": 1,
+  "companionCardId": 1
+}
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
+
+###
+
+###
+
+GET https://server.local:8443/rest/cards/getAll
+Authorization: 6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
+###
