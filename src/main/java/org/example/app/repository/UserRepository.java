@@ -23,9 +23,7 @@ public class UserRepository {
   private final RowMapper<UserWithRole> rowMapperWithRole = resultSet -> new UserWithRole(
           resultSet.getString("role")
   );
-  private final RowMapper<UserWithCode> rowMapperWithCode = resultSet -> new UserWithCode(
-          resultSet.getInt("code")
-  );
+
     private final RowMapper<UserWithToken> rowMapperWithToken = resultSet -> new UserWithToken(
             resultSet.getString("token"),
             resultSet.getLong("userId")
@@ -122,16 +120,6 @@ public class UserRepository {
             """,
             id,
             code);
-  }
-
-
-  public Optional<UserWithCode> findCode(long id) {
-    // language=PostgreSQL
-   return jdbcTemplate.queryOne("""
-            SELECT code FROM codes WHERE id = ?
-            """,
-            rowMapperWithCode,
-            id);
   }
 
   public void deleteCode(long id) {
