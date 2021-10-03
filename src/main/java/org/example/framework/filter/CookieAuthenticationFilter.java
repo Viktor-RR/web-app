@@ -9,11 +9,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.example.framework.attribute.ContextAttributes;
 import org.example.framework.attribute.RequestAttributes;
 import org.example.framework.security.*;
+import org.example.jdbc.DataAccessException;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class CookieAuthenticationFilter extends HttpFilter {
     private AuthenticationProvider provider;
+
 
     @Override
     public void init(FilterConfig config) throws ServletException {
@@ -32,8 +35,8 @@ public class CookieAuthenticationFilter extends HttpFilter {
             super.doFilter(req, res, chain);
             return;
         }
-        var finalCookie = cookie.replace("JSESSIONID=","").trim();
 
+        final var finalCookie = Arrays.stream(cookie).findFirst().orElseThrow(DataAccessException::new).getValue();
         try {
             final var authentication = provider.authenticate(new TokenAuthentication(finalCookie, null));
             req.setAttribute(RequestAttributes.AUTH_ATTR, authentication);
