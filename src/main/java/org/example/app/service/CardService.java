@@ -16,38 +16,38 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CardService {
 
-  public static final String NO_PERMISSION = "No permission to operation";
-  private final CardRepository cardRepository;
+    public static final String NO_PERMISSION = "No permission to operation";
+    private final CardRepository cardRepository;
 
-  public List<Card> getAllByOwnerId(long ownerId) {
-    return cardRepository.getAllCardsByOwnerId(ownerId);
-  }
-
-  public Optional<Card> getCardById(long ownerId, long cardId) {
-    return cardRepository.getCardById(ownerId, cardId);
-  }
-
-  public void deleteCardById(long ownerId, long cardId) {
-    cardRepository.deleteCardById(ownerId,cardId);
-  }
-
-  public void createCard(long ownerId, String vipNumber) {
-    cardRepository.createNewCard(ownerId, vipNumber);
-  }
-
-
-  public void moneyTransfer(TransferRequestDto requestDto, User user, Collection<String> auth) {
-    if (auth.contains(Roles.ROLE_USER)) {
-      final var ownerCard = cardRepository.getCardByNumber(requestDto.getOwnerCardNumber()).orElseThrow(CardNotFoundException::new);
-      final var companionCard = cardRepository.getCardByNumber(requestDto.getCompanionCardNumber()).orElseThrow(CardNotFoundException::new);
-      if (ownerCard.getBalance() >= requestDto.getMoneyValue() && requestDto.getMoneyValue() > 0 && ownerCard.getOwnerId() == user.getId()) {
-        cardRepository.cashFromCardToAnotherCard(ownerCard.getNumber(), companionCard.getNumber(), requestDto.getMoneyValue());
-      } else {
-        throw new CardNotFoundException();
-      }
-    } else {
-      throw new DataAccessException(NO_PERMISSION);
+    public List<Card> getAllByOwnerId(long ownerId) {
+        return cardRepository.getAllCardsByOwnerId(ownerId);
     }
-  }
+
+    public Optional<Card> getCardById(long ownerId, long cardId) {
+        return cardRepository.getCardById(ownerId, cardId);
+    }
+
+    public void deleteCardById(long ownerId, long cardId) {
+        cardRepository.deleteCardById(ownerId, cardId);
+    }
+
+    public void createCard(long ownerId, String vipNumber) {
+        cardRepository.createNewCard(ownerId, vipNumber);
+    }
+
+
+    public void moneyTransfer(TransferRequestDto requestDto, User user, Collection<String> auth) {
+        if (auth.contains(Roles.ROLE_USER)) {
+            final var ownerCard = cardRepository.getCardByNumber(requestDto.getOwnerCardNumber()).orElseThrow(CardNotFoundException::new);
+            final var companionCard = cardRepository.getCardByNumber(requestDto.getCompanionCardNumber()).orElseThrow(CardNotFoundException::new);
+            if (ownerCard.getBalance() >= requestDto.getMoneyValue() && requestDto.getMoneyValue() > 0 && ownerCard.getOwnerId() == user.getId()) {
+                cardRepository.cashFromCardToAnotherCard(ownerCard.getNumber(), companionCard.getNumber(), requestDto.getMoneyValue());
+            } else {
+                throw new CardNotFoundException();
+            }
+        } else {
+            throw new DataAccessException(NO_PERMISSION);
+        }
+    }
 
 }
