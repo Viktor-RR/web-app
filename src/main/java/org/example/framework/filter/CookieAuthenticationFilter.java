@@ -27,7 +27,7 @@ public class CookieAuthenticationFilter extends HttpFilter {
             super.doFilter(req, res, chain);
             return;
         }
-        final var cookie = req.getHeader("Cookie");
+        final var cookie = req.getCookies();
         if (cookie == null) {
             super.doFilter(req, res, chain);
             return;
