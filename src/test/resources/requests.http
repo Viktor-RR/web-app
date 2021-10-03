@@ -1,5 +1,4 @@
 ###
-# Registration
 POST https://server.local:8443/api/rest/users/register
 Content-Type: application/json
 
@@ -36,25 +35,14 @@ client.test("Request executed successfully", function() {
 
 
 POST https://server.local:8443/api/rest/cards/transfer
-Authorization: 6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
+X-Token: 0Y0kjj2tQTexoPYi4OdcTeVQK/94SJgl+AUuRCX4O0jGc/Nq4RoYO0xn3/fXw6Js7X2s3dqaizvi0coM9LVehg==
 Content-Type: application/json
 
 {
-  "moneyValue": 20000,
-  "cardId": 1,
-  "companionId": 2,
-  "companionCardId": 2
+  "ownerCardNumber": "**** *999",
+  "companionCardNumber": "**** *888",
+  "moneyValue": 20000
 }
-
-> {%
-client.test("Request executed successfully", function() {
-  client.assert(response.status === 403, "Wrong Role");
-});
-%}
-###
-
-GET https://server.local:8443/api/rest/cards/1
-Authorization: 6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
 
 > {%
 client.test("Request executed successfully", function() {
@@ -64,7 +52,7 @@ client.test("Request executed successfully", function() {
 ###
 
 DELETE https://server.local:8443/api/rest/cards/block/1
-Authorization: 6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
+X-Token: 6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
 
 > {%
 client.test("Request executed successfully", function() {
@@ -74,7 +62,7 @@ client.test("Request executed successfully", function() {
 ###
 
 POST https://server.local:8443/api/rest/cards/order
-Authorization: 6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
+X-Token: 6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
 
 > {%
 client.test("Request executed successfully", function() {
@@ -83,7 +71,7 @@ client.test("Request executed successfully", function() {
 %}
 ###
 GET https://server.local:8443/api/rest/cards/2
-Authorization: 0Y0kjj2tQTexoPYi4OdcTeVQK/94SJgl+AUuRCX4O0jGc/Nq4RoYO0xn3/fXw6Js7X2s3dqaizvi0coM9LVehg==
+X-Token: 0Y0kjj2tQTexoPYi4OdcTeVQK/94SJgl+AUuRCX4O0jGc/Nq4RoYO0xn3/fXw6Js7X2s3dqaizvi0coM9LVehg==
 
 > {%
 client.test("Request executed successfully", function() {
@@ -93,7 +81,7 @@ client.test("Request executed successfully", function() {
 ###
 
 DELETE https://server.local:8443/api/rest/cards/block/2
-Authorization: 0Y0kjj2tQTexoPYi4OdcTeVQK/94SJgl+AUuRCX4O0jGc/Nq4RoYO0xn3/fXw6Js7X2s3dqaizvi0coM9LVehg==
+X-Token: 0Y0kjj2tQTexoPYi4OdcTeVQK/94SJgl+AUuRCX4O0jGc/Nq4RoYO0xn3/fXw6Js7X2s3dqaizvi0coM9LVehg==
 
 > {%
 client.test("Request executed successfully", function() {
@@ -113,8 +101,19 @@ client.test("Request executed successfully", function() {
 %}
 ###
 
-GET https://server.local:8443/api/rest/cards/1
-Cookie: JSESSIONID=6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
+GET https://server.local:8443/api/rest/cards/2
+Cookie: qwe=0Y0kjj2tQTexoPYi4OdcTeVQK/94SJgl+AUuRCX4O0jGc/Nq4RoYO0xn3/fXw6Js7X2s3dqaizvi0coM9LVehg==
+
+> {%
+client.test("Request executed successfully", function() {
+  client.assert(response.status === 200, "Response status is not 200");
+});
+%}
+
+###
+
+GET https://server.local:8443/api/rest/cards/getAll
+X-Token: 6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
 
 > {%
 client.test("Request executed successfully", function() {
@@ -123,33 +122,11 @@ client.test("Request executed successfully", function() {
 %}
 ###
 
-POST https://server.local:8443/api/rest/cards/transfer
-Cookie: JSESSIONID=0Y0kjj2tQTexoPYi4OdcTeVQK/94SJgl+AUuRCX4O0jGc/Nq4RoYO0xn3/fXw6Js7X2s3dqaizvi0coM9LVehg==
+POST https://server.local:8443/api/rest/resetPassword
 Content-Type: application/json
 
 {
-  "moneyValue": 20000,
-  "cardId": 2,
-  "companionId": 1,
-  "companionCardId": 1
+  "username": "viktor"
 }
 
-> {%
-client.test("Request executed successfully", function() {
-  client.assert(response.status === 200, "Response status is not 200");
-});
-%}
-
-###
-
-###
-
-GET https://server.local:8443/rest/cards/getAll
-Authorization: 6NSb+2kcdKF44ut4iBu+dm6YLu6pakWapvxHtxqaPgMr5iRhox/HlhBerAZMILPjwnRtXms+zDfVTLCsao9nuw==
-
-> {%
-client.test("Request executed successfully", function() {
-  client.assert(response.status === 200, "Response status is not 200");
-});
-%}
 ###
