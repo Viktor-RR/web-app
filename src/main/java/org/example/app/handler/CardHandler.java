@@ -66,7 +66,6 @@ public class CardHandler {
         service.deleteCardById(user.getId(), cardId, authorities);
     }
 
-
     public void transferByCardNumber(HttpServletRequest req, HttpServletResponse resp) {
         try {
             final var user = UserHelper.getUser(req);
