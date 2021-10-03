@@ -21,10 +21,12 @@ public class AnonymousAuthenticationFilter extends HttpFilter {
     }
     @Override
     protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException {
-        final var token = req.getHeader("Authorization");
-        if (token == null) {
-                final var auth = authentication.provide();
-                req.setAttribute(RequestAttributes.AUTH_ATTR, auth);
+        final var basicHeader = req.getHeader("Authorization");
+        final var token = req.getHeader("X-Token");
+        final var cookie = req.getCookies();
+        if (basicHeader == null && cookie == null && token == null) {
+            final var auth = authentication.provide();
+            req.setAttribute(RequestAttributes.AUTH_ATTR, auth);
         }
         super.doFilter(req, res, chain);
     }
