@@ -54,7 +54,6 @@ public class UserService implements AnonymousProvider, AuthenticationProvider {
             final var newDay = Instant.now();
             repository.updateToken(user.getId(), token, Timestamp.from(newDay));
         }
-
         TokenAuthentication tokenAuthentication = null;
         if (role.equals(Roles.ROLE_USER)) {
             tokenAuthentication = repository.findByToken(token)
