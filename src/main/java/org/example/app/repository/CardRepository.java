@@ -16,6 +16,13 @@ public class CardRepository {
       resultSet.getString("number"),
       resultSet.getLong("balance")
   );
+  private final RowMapper<Card> cardOwnerRowMapper = resultSet -> new Card(
+          resultSet.getLong("id"),
+          resultSet.getString("number"),
+          resultSet.getLong("balance"),
+          resultSet.getLong("ownerId")
+  );
+
 
   public List<Card> getAllCardsByOwnerId(long ownerId) {
     // language=PostgreSQL
@@ -33,6 +40,14 @@ public class CardRepository {
             cardRowMapper,
             ownerId,
             id
+    );
+  }
+  public Optional<Card> getCardByNumber(String cardNumber) {
+    // language=PostgreSQL
+    return jdbcTemplate.queryOne(
+            "SELECT id, number, balance, \"ownerId\" FROM cards WHERE number = ?",
+            cardOwnerRowMapper,
+            cardNumber
     );
   }
 
@@ -55,23 +70,21 @@ public class CardRepository {
   }
 
 
-  public void cashFromCardToAnotherCard(int moneyValue,long ownerId,long cardId, long companionId, long companionCardId) {
+  public void cashFromCardToAnotherCard(String ownerCard, String companionCard, long moneyValue) {
     // language=PostgreSQL
     jdbcTemplate.update(
-             "UPDATE cards SET balance = balance - ? WHERE \"ownerId\" = ? AND id = ?",
+            "UPDATE cards SET balance = balance - ? WHERE number = ?",
             moneyValue,
-            ownerId,
-            cardId
+            ownerCard
     );
-    cashToCardFromAnotherCard(moneyValue,companionId,companionCardId);
+    cashToCardFromAnotherCard(moneyValue, companionCard);
   }
 
-  private void cashToCardFromAnotherCard(int moneyValue,long ownerId,long companionCardId) {
+  private void cashToCardFromAnotherCard(long moneyValue, String companionCard) {
     // language=PostgreSQL
-    jdbcTemplate.update("UPDATE cards SET balance = balance + ? WHERE \"ownerId\" = ? AND id = ?",
+    jdbcTemplate.update("UPDATE cards SET balance = balance + ? WHERE number = ?",
             moneyValue,
-            ownerId,
-            companionCardId
+            companionCard
     );
   }
 }

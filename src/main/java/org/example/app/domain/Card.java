@@ -4,11 +4,28 @@ public class Card {
   private long id;
   private String number;
   private long balance;
+  private long ownerId;
 
   public Card(long id, String number, long balance) {
     this.id = id;
     this.number = number;
     this.balance = balance;
+  }
+
+  public Card(long id, String number, long balance, long ownerId) {
+    this.id = id;
+    this.number = number;
+    this.balance = balance;
+    this.ownerId = ownerId;
+  }
+
+
+  public long getOwnerId() {
+    return ownerId;
+  }
+
+  public void setOwnerId(long ownerId) {
+    this.ownerId = ownerId;
   }
 
   public long getId() {

@@ -90,21 +90,12 @@ public class CardHandler {
         }
     }
 
-    public void transferById(HttpServletRequest req, HttpServletResponse resp) {
+    public void transferByCardNumber(HttpServletRequest req, HttpServletResponse resp) {
         try {
+            final var user = UserHelper.getUser(req);
             final var authorities = AuthHelper.getAuth(req).getAuthorities();
-            if (authorities.contains(Roles.ROLE_USER)) {
-                final var user = UserHelper.getUser(req);
-                final var transferRequestDto = gson.fromJson(req.getReader(), TransferRequestDto.class);
-                if (transferRequestDto.getMoneyValue() < 0) {
-                    throw new IncorrectMoneyValueException();
-                }
-                service.moneyTransfer(transferRequestDto.getMoneyValue(), user.getId(),
-                        transferRequestDto.getCardId(), transferRequestDto.getCompanionId(),
-                        transferRequestDto.getCompanionCardId());
-            } else {
-                resp.sendError(403);
-            }
+            final var transferRequestDto = gson.fromJson(req.getReader(), TransferRequestDto.class);
+            service.moneyTransfer(transferRequestDto, user, authorities);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
