@@ -26,7 +26,6 @@ public class CardHandler {
 
     public void getAll(HttpServletRequest req, HttpServletResponse resp) {
         try {
-
             final var user = UserHelper.getUser(req);
             final var authorities = AuthHelper.getAuth(req).getAuthorities();
             final var data = service.getAllByOwnerId(user.getId(), authorities);
@@ -40,7 +39,6 @@ public class CardHandler {
 
     public void getById(HttpServletRequest req, HttpServletResponse resp) {
         try {
-
             final var user = UserHelper.getUser(req);
             final var authorities = AuthHelper.getAuth(req).getAuthorities();
             final var cardId = Long.parseLong(((Matcher) req.getAttribute(RequestAttributes.PATH_MATCHER_ATTR)).group("cardId"));
