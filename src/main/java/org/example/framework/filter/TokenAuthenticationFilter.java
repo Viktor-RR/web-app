@@ -15,6 +15,7 @@ import java.io.IOException;
 public class TokenAuthenticationFilter extends HttpFilter {
   private AuthenticationProvider provider;
 
+
   @Override
   public void init(FilterConfig config) throws ServletException {
     super.init(config);
@@ -23,12 +24,11 @@ public class TokenAuthenticationFilter extends HttpFilter {
 
   @Override
   protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException {
-
     if (!authenticationIsRequired(req)) {
       super.doFilter(req, res, chain);
       return;
     }
-    final var token = req.getHeader("Authorization");
+    final var token = req.getHeader("X-Token");
     if (token == null) {
       super.doFilter(req, res, chain);
       return;

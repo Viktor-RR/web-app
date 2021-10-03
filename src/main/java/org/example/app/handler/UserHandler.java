@@ -1,29 +1,19 @@
 package org.example.app.handler;
 
 import com.google.gson.Gson;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.Part;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
-import org.example.app.domain.User;
 import org.example.app.dto.ConfirmationDto;
 import org.example.app.dto.LoginRequestDto;
 import org.example.app.dto.PasswordRestoreDto;
 import org.example.app.dto.RegistrationRequestDto;
-import org.example.app.service.CardService;
 import org.example.app.service.UserService;
-import org.example.app.util.AuthHelper;
-import org.example.app.util.UserHelper;
-import org.example.framework.attribute.RequestAttributes;
-import org.example.framework.security.Authentication;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.logging.Level;
-import java.util.regex.Matcher;
 
 @Log
 @RequiredArgsConstructor

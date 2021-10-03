@@ -12,10 +12,11 @@ import java.util.Optional;
 public class CardRepository {
   private final JdbcTemplate jdbcTemplate;
   private final RowMapper<Card> cardRowMapper = resultSet -> new Card(
-      resultSet.getLong("id"),
-      resultSet.getString("number"),
-      resultSet.getLong("balance")
+          resultSet.getLong("id"),
+          resultSet.getString("number"),
+          resultSet.getLong("balance")
   );
+
   private final RowMapper<Card> cardOwnerRowMapper = resultSet -> new Card(
           resultSet.getLong("id"),
           resultSet.getString("number"),
@@ -23,25 +24,15 @@ public class CardRepository {
           resultSet.getLong("ownerId")
   );
 
-
   public List<Card> getAllCardsByOwnerId(long ownerId) {
     // language=PostgreSQL
     return jdbcTemplate.queryAll(
-        "SELECT id, number, balance FROM cards WHERE \"ownerId\" = ? AND active = TRUE",
-        cardRowMapper,
-        ownerId
+            "SELECT id, number, balance FROM cards WHERE \"ownerId\" = ? AND active = TRUE",
+            cardRowMapper,
+            ownerId
     );
   }
 
-  public Optional<Card> getCardById(long ownerId, long id) {
-    // language=PostgreSQL
-    return jdbcTemplate.queryOne(
-            "SELECT id, number, balance FROM cards WHERE \"ownerId\" = ? AND id = ?",
-            cardRowMapper,
-            ownerId,
-            id
-    );
-  }
   public Optional<Card> getCardByNumber(String cardNumber) {
     // language=PostgreSQL
     return jdbcTemplate.queryOne(
@@ -64,9 +55,9 @@ public class CardRepository {
   public void createNewCard(long ownerId, String vipNumber) {
     // language=PostgreSQL
     jdbcTemplate.update("INSERT INTO cards (\"ownerId\", number) VALUES (?, ?)",
-           ownerId,
+            ownerId,
             vipNumber
-   );
+    );
   }
 
 
@@ -86,5 +77,11 @@ public class CardRepository {
             moneyValue,
             companionCard
     );
+  }
+
+  public Optional<Card> getCardById(long ownerId, long cardId) {
+    // language=PostgreSQL
+    return jdbcTemplate.queryOne("SELECT id, number, balance, \"ownerId\"  FROM cards WHERE id = ? AND \"ownerId\" = ?",
+            cardOwnerRowMapper, cardId, ownerId);
   }
 }

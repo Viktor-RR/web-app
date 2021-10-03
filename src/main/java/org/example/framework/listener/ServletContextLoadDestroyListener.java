@@ -8,6 +8,7 @@ import jakarta.servlet.annotation.WebListener;
 import org.example.app.handler.CardHandler;
 import org.example.app.handler.UserHandler;
 import org.example.app.repository.CardRepository;
+import org.example.app.repository.ResetCodeRepository;
 import org.example.app.repository.UserRepository;
 import org.example.app.service.CardService;
 import org.example.app.service.UserService;
@@ -40,11 +41,12 @@ public class ServletContextLoadDestroyListener implements ServletContextListener
             final var gson = new Gson();
 
             final var userRepository = new UserRepository(jdbcTemplate);
+            final var codeRepository = new ResetCodeRepository(jdbcTemplate);
             final var passwordEncoder = new Argon2PasswordEncoder();
             final var keyGenerator = new Base64StringKeyGenerator(64);
-            final var userService = new UserService(userRepository, passwordEncoder, keyGenerator);
-            context.setAttribute(ContextAttributes.AUTH_PROVIDER_ATTR, userService);
+            final var userService = new UserService(userRepository, passwordEncoder, keyGenerator,codeRepository);
             context.setAttribute(ContextAttributes.ANON_PROVIDER_ATTR, userService);
+            context.setAttribute(ContextAttributes.AUTH_PROVIDER_ATTR, userService);
             final var userHandler = new UserHandler(userService, gson);
 
             final var cardRepository = new CardRepository(jdbcTemplate);

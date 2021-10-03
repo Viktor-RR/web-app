@@ -15,24 +15,40 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 public class CardService {
-
     public static final String NO_PERMISSION = "No permission to operation";
     private final CardRepository cardRepository;
 
-    public List<Card> getAllByOwnerId(long ownerId) {
-        return cardRepository.getAllCardsByOwnerId(ownerId);
+    public List<Card> getAllByOwnerId(long ownerId, Collection<String> auth) {
+        if (haveAnyRights(auth)) {
+            return cardRepository.getAllCardsByOwnerId(ownerId);
+        } else {
+            throw new DataAccessException(NO_PERMISSION);
+        }
     }
 
-    public Optional<Card> getCardById(long ownerId, long cardId) {
-        return cardRepository.getCardById(ownerId, cardId);
+    public Optional<Card> getCardById(long ownerId, long cardId, Collection<String> auth) {
+        if (haveAnyRights(auth)) {
+            return cardRepository.getCardById(ownerId, cardId);
+        } else {
+            throw new DataAccessException(NO_PERMISSION);
+        }
     }
 
-    public void deleteCardById(long ownerId, long cardId) {
-        cardRepository.deleteCardById(ownerId, cardId);
+    public void createCard(long ownerId, Collection<String> auth) {
+        if (haveAnyRights(auth)) {
+            final var vipNumber = getHiddenNumber();
+            cardRepository.createNewCard(ownerId, vipNumber);
+        } else {
+            throw new DataAccessException(NO_PERMISSION);
+        }
     }
 
-    public void createCard(long ownerId, String vipNumber) {
-        cardRepository.createNewCard(ownerId, vipNumber);
+    public void deleteCardById(long ownerId, long cardId, Collection<String> auth) {
+        if (auth.contains(Roles.ROLE_ADMIN)) {
+            cardRepository.deleteCardById(ownerId, cardId);
+        } else {
+            throw new DataAccessException(NO_PERMISSION);
+        }
     }
 
 
@@ -49,5 +65,17 @@ public class CardService {
             throw new DataAccessException(NO_PERMISSION);
         }
     }
+
+
+    private boolean haveAnyRights(Collection<String> authorities) {
+        return authorities.contains(Roles.ROLE_USER) || authorities.contains(Roles.ROLE_ADMIN);
+    }
+
+    private String getHiddenNumber() {
+        final var v = (int) (1000000 + Math.random() * 89999999);
+        final var cardNumber = String.valueOf(v).substring(0, 4) + " " + String.valueOf(v).substring(4);
+        return cardNumber.replaceAll(cardNumber.substring(0, 6), "**** *");
+    }
+
 
 }

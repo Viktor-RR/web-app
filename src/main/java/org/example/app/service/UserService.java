@@ -140,7 +140,6 @@ public class UserService implements AnonymousProvider, AuthenticationProvider {
         return code;
     }
 
-
     public void setNewPassword(String username, String password, int code) {
         final var user = repository.getByUsername(username).orElseThrow(UserNotFoundException::new);
         final var dbCode = codeRepository.findCode(user.getId()).orElseThrow(UserNotFoundException::new);

@@ -10,10 +10,6 @@ import org.example.app.service.CardService;
 import org.example.app.util.AuthHelper;
 import org.example.app.util.UserHelper;
 import org.example.framework.attribute.RequestAttributes;
-import org.example.framework.security.Authentication;
-import org.example.framework.security.Roles;
-import org.example.jdbc.DataAccessException;
-import org.example.jdbc.IncorrectMoneyValueException;
 
 import java.io.IOException;
 import java.util.regex.Matcher;
