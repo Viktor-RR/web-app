@@ -11,10 +11,11 @@ import org.example.framework.attribute.RequestAttributes;
 import org.example.framework.security.*;
 
 import java.io.IOException;
-import java.util.Objects;
+import java.util.Base64;
 
 public class BasicAuthenticationFilter extends HttpFilter {
     private AuthenticationProvider provider;
+
 
     @Override
     public void init(FilterConfig config) throws ServletException {
@@ -34,14 +35,19 @@ public class BasicAuthenticationFilter extends HttpFilter {
             super.doFilter(req,res,chain);
             return;
         }
-        if (!Objects.requireNonNull(header).startsWith("Basic")) {
-            super.doFilter(req, res, chain);
-            return;
-        }
 
-        String principal = header.substring("Basic ".length());
+        var principal = header.substring("Basic ".length());
+        final byte[] decode = Base64.getDecoder().decode(principal);
+        var decodedPrincipal = new String(decode);
+        var index = decodedPrincipal.indexOf(":");
+        String username = null;
+        String password = null;
+        if (index != -1) {
+            username = decodedPrincipal.substring(0, index).trim();
+            password = decodedPrincipal.substring(index + 1).trim();
+        }
         try {
-            final var authentication = provider.authenticateBasic(new BasicAuthentication(principal, null));
+            final var authentication = provider.authenticate(new BasicAuthentication(username, password));
             req.setAttribute(RequestAttributes.AUTH_ATTR, authentication);
         } catch (AuthenticationException e) {
             res.sendError(401);
