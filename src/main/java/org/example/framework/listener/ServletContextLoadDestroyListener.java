@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.ServletSecurity;
-import jakarta.servlet.annotation.WebListener;
 import org.example.app.handler.CardHandler;
 import org.example.app.handler.UserHandler;
 import org.example.app.repository.CardRepository;

@@ -14,11 +14,10 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-// ЗАПРОС ОТ КЛИЕНТА ПОСТУПАЕТ НА FRONT SERVLET(DISPATCHER SERVLET) КОТОРЫЙ РЕШАЕТ КУДА ДАЛЬШЕ ОТПРАВИТЬ ЗАПРОС.
+
 public class FrontServlet extends HttpServlet {
   private Map<Pattern, Map<String, Handler>> routes;
 
-  // НАСТРОЙКА СЕРВЛЕТА (ВСЕГО КОМПОНЕНТА), ПОДГРУЖАЕТ ВСЁ НЕОБХОДИМОЕ ДЛЯ РАБОТЫ
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
@@ -26,7 +25,6 @@ public class FrontServlet extends HttpServlet {
   }
 
 
-  //ОПРЕДЕЛЯЕТ ПО КАКОМУ ПУТИ ПРИХОДИТ КЛИЕНТ(getPath), И по этому пути-ключу ищет подходяший Handler-обработчик (findHandler)
   @Override
   protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
     try {

@@ -16,11 +16,8 @@ import org.springframework.security.crypto.keygen.StringKeyGenerator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.sql.Timestamp;
-import java.time.*;
-import java.util.Base64;
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 public class UserService implements AnonymousProvider, AuthenticationProvider {
