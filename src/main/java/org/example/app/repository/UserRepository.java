@@ -20,9 +20,8 @@ public class UserRepository {
       resultSet.getString("username"),
       resultSet.getString("password")
   );
-  private final RowMapper<UserWithRole> rowMapperWithRole = resultSet -> new UserWithRole(
-          resultSet.getString("role")
-  );
+  private final RowMapper<String> rowMapperWithRole = resultSet ->
+          resultSet.getString("role");
 
     private final RowMapper<UserWithToken> rowMapperWithToken = resultSet -> new UserWithToken(
             resultSet.getString("token"),
@@ -104,14 +103,14 @@ public class UserRepository {
     );
   }
 
- public Optional<UserWithRole> findByRole(long id) {
+  public Optional<String> findByRole(long id) {
     // language=PostgreSQL
     return jdbcTemplate.queryOne("""
-            SELECT role FROM roles WHERE id = ?
+            SELECT role FROM roles WHERE "userId" = ?
             """,
             rowMapperWithRole,
             id );
- }
+  }
 
   public void saveCode(long id, int code) {
     // language=PostgreSQL
