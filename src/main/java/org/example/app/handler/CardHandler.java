@@ -20,24 +20,19 @@ import java.util.regex.Matcher;
 
 @Log
 @RequiredArgsConstructor
-//ВЫТАСКИВАЕТ ДАННЫЕ ИЗ ЗАПРОСА И ФОРМИРУЕТ ОТВЕТ В НУЖНОМ НАМ ФОРМАТЕ
-// ПО СУТИ ЯВЛЯЕТСЯ АНАЛОГОМ REST CONTROLLER
-
 public class CardHandler {
     private final CardService service;
     private final Gson gson;
 
     public void getAll(HttpServletRequest req, HttpServletResponse resp) {
         try {
+
+            final var user = UserHelper.getUser(req);
             final var authorities = AuthHelper.getAuth(req).getAuthorities();
-            if (authorities.contains(Roles.ROLE_USER) || authorities.contains(Roles.ROLE_ADMIN)) {
-                final var user = UserHelper.getUser(req);
-                final var data = service.getAllByOwnerId(user.getId());
-                resp.setHeader("Content-Type", "application/json");
-                resp.getWriter().write(gson.toJson(data));
-            } else {
-                resp.sendError(403);
-            }
+            final var data = service.getAllByOwnerId(user.getId(), authorities);
+            resp.setHeader("Content-Type", "application/json");
+            resp.getWriter().write(gson.toJson(data));
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -45,16 +40,14 @@ public class CardHandler {
 
     public void getById(HttpServletRequest req, HttpServletResponse resp) {
         try {
+
+            final var user = UserHelper.getUser(req);
             final var authorities = AuthHelper.getAuth(req).getAuthorities();
-            if (authorities.contains(Roles.ROLE_USER) || authorities.contains(Roles.ROLE_ADMIN)) {
-                final var cardId = Long.parseLong(((Matcher) req.getAttribute(RequestAttributes.PATH_MATCHER_ATTR)).group("cardId"));
-                final var user = UserHelper.getUser(req);
-                final var data = service.getCardById(user.getId(), cardId);
-                resp.setHeader("Content-Type", "application/json");
-                resp.getWriter().write(gson.toJson(data));
-            } else {
-                resp.sendError(403);
-            }
+            final var cardId = Long.parseLong(((Matcher) req.getAttribute(RequestAttributes.PATH_MATCHER_ATTR)).group("cardId"));
+            final var data = service.getCardById(user.getId(), cardId, authorities);
+            resp.setHeader("Content-Type", "application/json");
+            resp.getWriter().write(gson.toJson(data));
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -62,33 +55,17 @@ public class CardHandler {
 
     public void order(HttpServletRequest req, HttpServletResponse resp) {
         final var authorities = AuthHelper.getAuth(req).getAuthorities();
-        if (authorities.contains(Roles.ROLE_USER) || authorities.contains(Roles.ROLE_ADMIN)) {
-            final var user = UserHelper.getUser(req);
-            final var hiddenNumber = getHiddenNumber();
-            service.createCard(user.getId(), hiddenNumber);
-        } else {
-            try {
-                resp.sendError(403);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        final var user = UserHelper.getUser(req);
+        service.createCard(user.getId(), authorities);
     }
 
     public void blockById(HttpServletRequest req, HttpServletResponse resp) {
+        final var cardId = Long.parseLong(((Matcher) req.getAttribute(RequestAttributes.PATH_MATCHER_ATTR)).group("cardId"));
+        final var user = UserHelper.getUser(req);
         final var authorities = AuthHelper.getAuth(req).getAuthorities();
-        if (authorities.contains(Roles.ROLE_ADMIN)) {
-            final var cardId = Long.parseLong(((Matcher) req.getAttribute(RequestAttributes.PATH_MATCHER_ATTR)).group("cardId"));
-            final var user = UserHelper.getUser(req);
-            service.deleteCardById(user.getId(), cardId);
-        } else {
-            try {
-                resp.sendError(403);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        service.deleteCardById(user.getId(), cardId, authorities);
     }
+
 
     public void transferByCardNumber(HttpServletRequest req, HttpServletResponse resp) {
         try {
@@ -99,11 +76,5 @@ public class CardHandler {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private String getHiddenNumber() {
-        final var v = (int) (1000000 + Math.random() * 89999999);
-        final var cardNumber = String.valueOf(v).substring(0, 4) + " " + String.valueOf(v).substring(4);
-        return cardNumber.replaceAll(cardNumber.substring(0, 6), "**** *");
     }
 }

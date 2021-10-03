@@ -52,7 +52,7 @@ public class ServletContextLoadDestroyListener implements ServletContextListener
             final var cardHandler = new CardHandler(cardService, gson);
 
             final var routes = Map.<Pattern, Map<String, Handler>>of(
-                    Pattern.compile("/rest/cards/transfer"), Map.of(POST, cardHandler::transferById),
+                    Pattern.compile("/rest/cards/transfer"), Map.of(POST, cardHandler::transferByCardNumber),
                     Pattern.compile("/rest/resetPassword"), Map.of(POST, userHandler::resetPassword),
                     Pattern.compile("/rest/confirmPassword"), Map.of(POST, userHandler::confirmPassword),
                     Pattern.compile("/rest/cards/getAll"), Map.of(GET, cardHandler::getAll),
