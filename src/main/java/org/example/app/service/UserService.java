@@ -9,44 +9,50 @@ import org.example.app.dto.RegistrationResponseDto;
 import org.example.app.exception.PasswordNotMatchesException;
 import org.example.app.exception.RegistrationException;
 import org.example.app.exception.UserNotFoundException;
+import org.example.app.repository.ResetCodeRepository;
 import org.example.app.repository.UserRepository;
 import org.example.framework.security.*;
 import org.springframework.security.crypto.keygen.StringKeyGenerator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.Month;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-public class UserService implements AuthenticationProvider, AnonymousProvider {
+public class UserService implements AnonymousProvider, AuthenticationProvider {
+    public static final String CONFIRMATION_CODE_IS_INCORRECT = "Confirmation code is incorrect";
     private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final StringKeyGenerator keyGenerator;
+    private final ResetCodeRepository codeRepository;
+
 
     @Override
     public Authentication authenticate(Authentication authentication) {
-              var token = (String) authentication.getPrincipal();
-        final var user = repository.findByToken(token).orElseThrow(AuthenticationException::new);
-        final var role = repository.findByRole(user.getId()).orElseThrow(AuthenticationException::new).getRole();
+        final var providerManager = new ProviderManager(List.of(new BasicAuthenticationProvider(UserService.this), new TokenAuthenticationProvider(UserService.this)));
+        Authentication finalAuth = null;
+        if (providerManager.supports(authentication)) {
+            finalAuth = providerManager.authenticate(authentication);
+        }
+        return finalAuth;
+    }
 
-        final var tokenTime = repository.findTokenDate(user.getId()).orElseThrow(AuthenticationException::new);
-        final var tokenCreatedTime = tokenTime.toLocalDateTime();
-        final var expirationTime = LocalDateTime.of(tokenCreatedTime.getYear() + TokenLifeTime.expirationTime, tokenCreatedTime.getMonth(), tokenCreatedTime.getDayOfMonth(), tokenCreatedTime.getHour(),
-                tokenCreatedTime.getMinute(), tokenCreatedTime.getSecond(), tokenCreatedTime.getNano());
-        final var expirationFinalToken = expirationTime.atZone(ZoneId.of("Europe/Moscow")).toInstant().toEpochMilli() / 1000;
+    public Authentication authenticate(TokenAuthentication authentication) {
+        var token = (String) authentication.getPrincipal();
+        final var user = repository.findByToken(token).orElseThrow(AuthenticationException::new);
+        final var role = repository.findByRole(user.getId()).orElseThrow(AuthenticationException::new);
+
+        final var tokenTimeCreated = repository.findTokenDate(user.getId()).orElseThrow(AuthenticationException::new).toEpochMilli() / 1000;
+        final var tokenExpirationTime = tokenTimeCreated + TokenLifeTime.expirationTime;
         final var today = System.currentTimeMillis() / 1000;
-        if (expirationFinalToken < today) {
-           token = keyGenerator.generateKey();
-            final LocalDateTime now = LocalDateTime.now();
-            final Timestamp timestamp = Timestamp.valueOf(now);
-            repository.updateToken(user.getId(),token,timestamp);
+        if (tokenExpirationTime < today) {
+            token = keyGenerator.generateKey();
+            final var newDay = Instant.now();
+            repository.updateToken(user.getId(), token, Timestamp.from(newDay));
         }
 
         TokenAuthentication tokenAuthentication = null;
@@ -62,23 +68,15 @@ public class UserService implements AuthenticationProvider, AnonymousProvider {
         return tokenAuthentication;
     }
 
-    @Override
-    public Authentication authenticateBasic(Authentication authentication) throws AuthenticationException {
-        final var principal = (String) authentication.getPrincipal();
-        final byte[] decode = Base64.getDecoder().decode(principal);
-        var decodedPrincipal = new String(decode);
-        var index = decodedPrincipal.indexOf(":");
-        String username = null;
-        String password = null;
-        if (index != -1) {
-            username = decodedPrincipal.substring(0, index).trim();
-            password = decodedPrincipal.substring(index + 1).trim();
-        }
+    public Authentication authenticate(BasicAuthentication authentication) {
+        final var username = (String) authentication.getPrincipal();
+        final var password = (String) authentication.getCredentials();
+
         final var user = repository.getByUsernameWithPassword(username).orElseThrow(AuthenticationException::new);
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new PasswordNotMatchesException();
         }
-        final var role = repository.findByRole(user.getId()).orElseThrow(AuthenticationException::new).getRole();
+        final var role = repository.findByRole(user.getId()).orElseThrow(AuthenticationException::new);
 
         BasicAuthentication basicAuthentication = null;
         if (role.equals(Roles.ROLE_USER)) {
@@ -138,17 +136,25 @@ public class UserService implements AuthenticationProvider, AnonymousProvider {
     public int restorePassword(String username) {
         final var user = repository.getByUsername(username).orElseThrow(UserNotFoundException::new);
         final var code = (int) (100000 + Math.random() * 899999);
-        repository.saveCode(user.getId(), code);
+        codeRepository.saveCode(user.getId(), code);
         return code;
     }
 
     public void setNewPassword(String username, String password, int code) {
         final var user = repository.getByUsername(username).orElseThrow(UserNotFoundException::new);
-        final var dbCode = repository.findCode(user.getId()).orElseThrow(UserNotFoundException::new).getCode();
+        final var dbCode = codeRepository.findCode(user.getId()).orElseThrow(UserNotFoundException::new);
         if (dbCode == code) {
             final var hashPassword = passwordEncoder.encode(password);
             repository.save(user.getId(), username, hashPassword).orElseThrow(RegistrationException::new);
-            repository.deleteCode(user.getId());
+            codeRepository.deleteCode(user.getId());
+        } else {
+            throw new RuntimeException(CONFIRMATION_CODE_IS_INCORRECT);
         }
+    }
+
+
+    @Override
+    public boolean supports(Authentication authentication) {
+        return true;
     }
 }

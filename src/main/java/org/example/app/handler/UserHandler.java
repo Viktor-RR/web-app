@@ -33,7 +33,7 @@ public class UserHandler {
 
     public void register(HttpServletRequest req, HttpServletResponse resp) {
         try {
-            log.log(Level.INFO, "register");
+
             final var requestDto = gson.fromJson(req.getReader(), RegistrationRequestDto.class);
             final var responseDto = service.register(requestDto);
             resp.setHeader("Content-Type", "application/json");
@@ -43,13 +43,13 @@ public class UserHandler {
         }
     }
 
+
     public void login(HttpServletRequest req, HttpServletResponse resp) {
         try {
-            log.log(Level.INFO, "register");
             final var requestDto = gson.fromJson(req.getReader(), LoginRequestDto.class);
             final var responseDto = service.login(requestDto);
             if (requestDto.isCookieEnable()) {
-                final var cookie = new Cookie("JSESSIONID", responseDto.getToken());
+                final var cookie = new Cookie("login-cookie", responseDto.getToken());
                 cookie.setHttpOnly(true);
                 resp.addCookie(cookie);
             }
