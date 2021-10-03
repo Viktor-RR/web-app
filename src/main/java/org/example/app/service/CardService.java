@@ -35,6 +35,7 @@ public class CardService {
     cardRepository.createNewCard(ownerId, vipNumber);
   }
 
+
   public void moneyTransfer(TransferRequestDto requestDto, User user, Collection<String> auth) {
     if (auth.contains(Roles.ROLE_USER)) {
       final var ownerCard = cardRepository.getCardByNumber(requestDto.getOwnerCardNumber()).orElseThrow(CardNotFoundException::new);
